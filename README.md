@@ -4,6 +4,8 @@
 
 Retroloader is a simple single-EXE game loader for Retroarch on Windows. It can be set as the default program for file extensions such as .sfc, .gba, and .iso. When a such a file is launched with Retroloader, it will determine whether any installed Retroarch cores support the file and prompt the user to choose which should be loaded. (If only one core supports files with that extension, it will be loaded without prompting.)
 
+![Screenshot](screenshot.png)
+
 Retroloader _only supports extensions included in the core info files_ included with Retroarch, located in the `Retroarch\info` folder. You may need to download these files from the Retroarch auto-updater.
 
 #### To build:
