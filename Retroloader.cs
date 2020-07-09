@@ -73,7 +73,7 @@ namespace Retroloader
 
 			if (retroarchPath is null)
 			{
-				MessageBox.Show("Could not find 'retroarch.exe'.\nMove Retroloader into Retroarch's folder.", "Retroloader", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show("Could not find retroarch.exe.\n\nMove Retroloader into Retroarch's folder.", "Retroloader", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				Environment.Exit(1);
 			}
 
@@ -81,7 +81,7 @@ namespace Retroloader
 			// Verify valid path for target.
 			if (args == null || args.Length < 1)
 			{
-				MessageBox.Show("You must provide a valid path to a file.\nEither use Retroloader as the target of an 'Open with...' request or drag & drop a file onto Retroloader.", "Retroloader", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show("You must provide a valid path to a file.\n\nEither use Retroloader as the target of an 'Open with...' request or drag & drop a file onto Retroloader's executable.", "Retroloader", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				Environment.Exit(1);
 			}
 
@@ -91,7 +91,7 @@ namespace Retroloader
 			string targetExtension = targetFI.Extension.Substring(1, targetFI.Extension.Length - 1);
 			if (!File.Exists(target))
 			{
-				MessageBox.Show($"File '{target}' doesn't exist.", "Retroloader", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show($"File \n{target}\n doesn't exist.", "Retroloader", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				Environment.Exit(1);
 			}
 
@@ -102,6 +102,11 @@ namespace Retroloader
 				FileInfo coreFI = new FileInfo(corePath);
 				string coreName = coreFI.Name.Substring(0, coreFI.Name.Length - 4);
 				string infoPath = Path.Combine(retroarchPath, "info", $"{coreName}.info");
+				if (!File.Exists(infoPath))
+				{
+					MessageBox.Show($"Could not find info file for core:\n'{infoPath}'\n\nLaunch Retroarch, then select 'Update Core Info Files' from the Online Updater menu.", "Retroloader", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					Environment.Exit(1);
+				}
 				var info = ParseRetroarchCoreInfoFile(infoPath, new[] { "corename", "supported_extensions" });
 				cores.Add(new RetroarchCoreInfo(corePath, coreName, info["corename"], info["supported_extensions"].Split('|')));
 			}
@@ -118,7 +123,7 @@ namespace Retroloader
 			// Run target with core, or ask user which core to use if multiple cores report support for target's extension.
 			if (validCores.Count == 0)
 			{
-				string message = $"No core reported being able to load '.{targetExtension}' files.\nYou may need to install an appropriate core.";
+				string message = $"No core reported being able to load '.{targetExtension}' files.\n\nLaunch Retroarch, then install an appropriate core using the Online Updater menu.";
 				string caption = "Retroloader";
 				var buttons = MessageBoxButtons.OK;
 				MessageBox.Show(message, caption, buttons, MessageBoxIcon.Error);
