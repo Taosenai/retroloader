@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -109,7 +110,8 @@ namespace Retroloader
 							{
 								retroarchDir = Path.GetDirectoryName(shimmedPath);
 							}
-						} else
+						}
+						else
 						{
 							retroarchDir = whereDir;
 						}
@@ -189,15 +191,18 @@ namespace Retroloader
 					}
 				}
 
-				// If only one core supports the extension, run target with core; else, ask user which core to use.
+				// At least one core must support the target extension.
 				if (validCores.Count == 0)
 				{
 					string message = $"No core reported being able to load '.{targetExtension}' files.\n\nLaunch Retroarch, then install an appropriate core using the Online Updater menu.";
 					string caption = "Retroloader";
 					var buttons = MessageBoxButtons.OK;
 					MessageBox.Show(message, caption, buttons, MessageBoxIcon.Error);
+					Environment.Exit(1);
 				}
-				else if (validCores.Count > 1)
+
+				// If multiple cores support the target extension, ask user which core to use.
+				if (validCores.Count > 1)
 				{
 					Application.EnableVisualStyles();
 					Application.SetCompatibleTextRenderingDefault(false);
@@ -208,6 +213,21 @@ namespace Retroloader
 				{
 					var core = validCores[0];
 					Process.Start(retroarchPath, $" -L \"{core.Path}\" \"{target}\"");
+				}
+
+				// Register Retroloader's support for the extension after loading it successfully.
+				var extKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Classes\" + $".{targetExtension}");
+				var extType = extKey.GetValue("");
+				var extCommand = $"\"{Application.ExecutablePath}\" \"%1\"";
+				var keyName = extType + @"\shell\open\command";
+				using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Classes\." + keyName))
+				{
+					var val = key.GetValue("");
+					// Only update the key if it is unset or is already associated with retroloader (maybe in a different directory).
+					if (val == null || val.ToString().Contains("retroloader.exe"))
+					{
+						key.SetValue("", extCommand);
+					}
 				}
 			}
 			catch (Exception e)
