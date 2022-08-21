@@ -42,7 +42,9 @@ namespace Retroloader
 				button.Click += new EventHandler((Object clickSender, EventArgs clickEvent) =>
 				{
 					Close();
-					Console.WriteLine(Process.Start(Path.Combine(RetroarchPath, "retroarch.exe"), $" -L \"{core.Path}\" \"{Target}\""));
+					var psi = new ProcessStartInfo(Path.Combine(RetroarchPath, "retroarch.exe"), $" -L \"{core.Path}\" \"{Target}\"");
+					psi.WorkingDirectory = RetroarchPath;
+					Process.Start(psi);
 				});
 				this.buttonPanel.Controls.Add(button);
 			}

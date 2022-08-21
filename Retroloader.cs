@@ -212,22 +212,22 @@ namespace Retroloader
 				else
 				{
 					var core = validCores[0];
-					Process.Start(retroarchPath, $" -L \"{core.Path}\" \"{target}\"");
+					var psi = new ProcessStartInfo(retroarchPath, $" -L \"{core.Path}\" \"{target}\"");
+					psi.WorkingDirectory = retroarchDir;
+					Process.Start(psi);
 				}
 
 				// Register Retroloader's support for the extension after loading it successfully.
-				var extKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Classes\" + $".{targetExtension}");
-				var extType = extKey.GetValue("");
-				var extCommand = $"\"{Application.ExecutablePath}\" \"%1\"";
-				var keyName = extType + @"\shell\open\command";
-				using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Classes\." + keyName))
+				var extKey = Registry.CurrentUser.CreateSubKey($"SOFTWARE\\Classes\\.{targetExtension}\\OpenWithProgids", true);
+				var rlKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Classes\retroloader\shell\open\command", true);
+				var rlCommand = $"\"{Application.ExecutablePath}\" \"%1\"";
+				rlKey.SetValue("", rlCommand);
+
+				// Only update the extension key if it is unset or is already associated with retroloader (maybe in a different directory).
+				var progIds = extKey.GetSubKeyNames();
+				if (progIds.Length == 0 || progIds.Contains("retroloader"))
 				{
-					var val = key.GetValue("");
-					// Only update the key if it is unset or is already associated with retroloader (maybe in a different directory).
-					if (val == null || val.ToString().Contains("retroloader.exe"))
-					{
-						key.SetValue("", extCommand);
-					}
+					extKey.SetValue("retroloader", "");
 				}
 			}
 			catch (Exception e)
