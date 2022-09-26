@@ -146,7 +146,7 @@ namespace Retroloader
 				// Get target extension.
 				string target = args.Last();
 				FileInfo targetFI = new FileInfo(target);
-				string targetExtension = targetFI.Extension.Substring(1, targetFI.Extension.Length - 1);
+				string targetExtension = targetFI.Extension.Substring(1, targetFI.Extension.Length - 1).ToLower();
 				if (!File.Exists(target))
 				{
 					MessageBox.Show($"File \n{target}\n doesn't exist.", "Retroloader", MessageBoxButtons.OK, MessageBoxIcon.Error);
